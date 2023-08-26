@@ -28,12 +28,15 @@ namespace Commy.Controllers
             return categories;
         }
 
+       
+
         [HttpPost]
         public async Task<ActionResult> CreateCategory(string Name, string Description)
         {
             Category category = new Category(Name, Description);
             _context.Categories.Add(category);
             _context.SaveChanges();
+
             return Ok(category);
         }
 

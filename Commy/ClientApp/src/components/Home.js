@@ -36,7 +36,7 @@ export class Home extends Component {
         const newItem = { itemName, description };
 
         try {
-            await axios.post('http://localhost:5111/saveItem', newItem);
+            await axios.put('http://localhost:5111/Category', newItem);
             this.toggleItemModal();
         } catch (error) {
             console.error('Error saving item:', error);
