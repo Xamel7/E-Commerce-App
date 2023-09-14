@@ -1,113 +1,195 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Label, Input } from 'reactstrap';
 import axios from 'axios';
+import CategoryDetailModal from './CategoryDetailModal';
+import PostCategory from './PostCategory';
+import Products from './Products';
 
-export class Home extends Component {
-    static displayName = Home.name;
+export function Home() {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            modalOpen: false,
-            itemModalOpen: false,
-            itemName: '',
-            description: '',
-        };
+    const [getCategories, setCategories] = useState([]);
+    const [categoryListModalOpen, setCategoryListModalOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedCategoryProducts, setSelectedCategoryProducts] = useState(null);
+
+    const toggleCategoryListModal = () => {
+        setCategoryListModalOpen(!categoryListModalOpen);
+    };
+
+    const openCategoryDetailModal = async(category) => {
+        setSelectedCategory(category);
+        fetchProductsForCategory(category);
+    };
+
+    const closeCategoryDetailModal = () => {
+        setSelectedCategory(null);
+    };
+
+    const [itemModalOpen, setItemModalOpen] = useState(false);
+    const [editCategory, setEditedCategory] = useState(null);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const toggleCategory = () => {
+        setModalIsOpen(false);
     }
+    const [modalOpen, setModalOpen] = useState(false);
 
-    toggleModal = () => {
-        this.setState({
-            modalOpen: !this.state.modalOpen,
-        });
+    const toggleModal = (category) => {
+        setSelectedCategory(category);
+        setModalOpen(!modalOpen);
+    };
+    const toggleOpenModal = (category) => {
+        setEditedCategory(category);
+        setSelectedCategory(category); // Set the selected category for editing
+        console.log(category);
+        setEditModalOpen(!editModalOpen);
     };
 
-    toggleItemModal = () => {
-        this.setState({
-            itemModalOpen: !this.state.itemModalOpen,
-        });
+    const toggleItemModal = (category) => {
+        setEditedCategory(category);
+        setItemModalOpen(category);
     };
 
-    handleItemClick = () => {
-        this.toggleItemModal();
-    };
-
-    saveItem = async () => {
-        const { itemName, description } = this.state;
-        const newItem = { itemName, description };
-
+    const fetchProductsForCategory = async (category) => {
+        setSelectedCategory(category);
         try {
-            await axios.put('http://localhost:5111/Category', newItem);
-            this.toggleItemModal();
+            const response = await axios.get(`https://localhost:7287/Products?categoryId=${category.id}`);
+            console.log('API Response:', response.data); // Log the API response
+            setSelectedCategoryProducts(response.data);
         } catch (error) {
-            console.error('Error saving item:', error);
+            console.error('Error fetching products:', error);
         }
     };
 
-    render() {
-        return (
-            <div>
-                <h1>Hello, You Commy Swine!</h1>
-                <Button color="primary" onClick={this.toggleModal}>
-                    Open Menu
-                </Button>
-                <Modal isOpen={this.state.modalOpen} toggle={this.toggleModal}>
-                    <ModalHeader toggle={this.toggleModal}>Item List</ModalHeader>
-                    <ModalBody>
-                        <ul className="list-group">
-                            <div>
-                                <Button outline color="primary" onClick={this.handleItemClick}>
-                                    Groceries
-                                </Button>{' '}
-                                <Button outline color="primary" onClick={this.handleItemClick}>
-                                    Clothes
-                                </Button>{' '}
-                                <Button outline color="primary" onClick={this.handleItemClick}>
-                                    Electronics
-                                </Button>{' '}
-                                <Button outline color="primary" onClick={this.handleItemClick}>
-                                    Home Appliances
-                                </Button>{' '}
-                                <Button outline color="primary" onClick={this.handleItemClick}>
-                                    Jewelry
-                                </Button>{' '}
-                                <Button outline color="primary" onClick={this.handleItemClick}>
-                                    Instrumental
-                                </Button>{' '}
+      
 
+    // const handleItemClick = async (category) => {
+    //     // When a category is clicked, set it as the selected category
+    //     setSelectedCategory(category);
 
-                                {/* Add more buttons */}
-                            </div>
-                        </ul>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button color="secondary" onClick={this.toggleModal}>
-                            Close
-                        </Button>
-                    </ModalFooter>
-                </Modal>
+    //     try {
+    //         const response = await axios.get(`https://localhost:7287/Products?categoryId=${category.id}`);
+    //         // Assuming the API endpoint returns products related to the selected category
+    //         setSelectedCategoryProducts(response.data);
+    //     } catch (error) {
+    //         console.error('Error fetching products:', error);
+    //     }
+    // };
+    const fetchData = async () => {
+        try {
+            const response = await axios.get(`https://localhost:7287/Categories`);
+            setCategories(response.data);
+            console.log(response.data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
 
-                <Modal isOpen={this.state.itemModalOpen} toggle={this.toggleItemModal}>
-                    <ModalHeader toggle={this.toggleItemModal}>Edit Item</ModalHeader>
-                    <ModalBody>
-                        <Form>
-                            <FormGroup>
-                                <Label for="itemName">Item Name</Label>
-                                <Input type="text" name="itemName" id="itemName" value={this.state.itemName} onChange={e => this.setState({itemName: e.target.value})}/>
-                                <Label for="Description">Description</Label>
-                                <Input type="text" name="Description" id="Description" value={this.state.description} onChange={e => this.setState({ description: e.target.value})}/>
-
-                            </FormGroup>
-                            {/* Add more form fields */}
-                        </Form>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button color="primary" onClick={this.saveItem}>Save</Button>
-                        <Button color="secondary" onClick={this.toggleItemModal}>
-                            Cancel
-                        </Button>
-                    </ModalFooter>
-                </Modal>
-            </div>
-        );
+    const deleteCategory = async (category) => {
+      if (!category) {
+        // Handle the case where category is null or undefined
+        console.error("Cannot delete null or undefined category.");
+        return;
     }
+        try {
+            await axios.delete(`https://localhost:7287/categories/${category.id}`);
+            toggleItemModal(null);
+            fetchData();
+        } catch (error) {
+            console.error('Error deleting category:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    return (
+        <div>
+            <h1>Hello, Please Enjoy Yourself!</h1>
+
+            <Button color="primary" onClick={toggleCategoryListModal}>
+                Open Category List
+            </Button>
+
+            <Modal isOpen={categoryListModalOpen} toggle={toggleCategoryListModal}>
+                <ModalHeader toggle={toggleCategoryListModal}>Category List</ModalHeader>
+                <ModalBody>
+                    <ul>
+                        {getCategories.map((category, id) => (
+                            <li key={id}>
+                                <Button color="link" onClick={() => openCategoryDetailModal(category)}>
+                                    {category.name}
+                                </Button>
+                                <Button color="link" onClick={() => deleteCategory(category)}>
+                                    Delete
+                                </Button>
+
+                            </li>
+                        ))}
+                    </ul>
+                </ModalBody>
+                <ModalFooter>
+                    <Button onClick={toggleCategoryListModal}>
+                        Close
+                    </Button>
+                </ModalFooter>
+            </Modal>
+
+            {selectedCategory && (
+                <CategoryDetailModal
+                    isOpen={!!selectedCategory}
+                    toggle={closeCategoryDetailModal}
+                    category={selectedCategory}
+                    fetchData={fetchData}
+                    selectedCategoryProducts={selectedCategoryProducts}
+                />
+            )}
+            <PostCategory 
+            fetchData={fetchData}
+            />
+            <Products
+            
+            />
+        </div>
+
+        /* <Button color="primary" onClick={toggleModal}>
+          Open Menu
+        </Button>
+        <Modal isOpen={modalOpen} toggle={toggleModal}>
+          <ModalHeader toggle={toggleModal}>Item List</ModalHeader>
+          <ModalBody>
+            <ul className="list-group">
+              <div>
+                <Button outline color="primary" onClick={handleItemClick}>
+                  Groceries
+                </Button>{' '}
+                <Button outline color="primary" onClick={handleItemClick}>
+                  Clothes
+                </Button>{' '}
+                <Button outline color="primary" onClick={handleItemClick}>
+                  Electronics
+                </Button>{' '}
+                <Button outline color="primary" onClick={handleItemClick}>
+                  Home Appliances
+                </Button>{' '}
+                <Button outline color="primary" onClick={handleItemClick}>
+                  Jewelry
+                </Button>{' '}
+                <Button outline color="primary" onClick={handleItemClick}>
+                  Instrumental
+                </Button>{' '} */
+        /* Add more buttons */
+        /* </div> */
+        /* </ul> */
+        /* </ModalBody>
+        <ModalFooter>
+          <Button color="secondary" onClick={toggleModal}>
+            Close
+          </Button>
+        </ModalFooter>
+      </Modal> */
+
+    );
 }

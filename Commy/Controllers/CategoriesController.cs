@@ -28,23 +28,50 @@ namespace Commy.Controllers
             return categories;
         }
 
-       
+
 
         [HttpPost]
-        public async Task<ActionResult> CreateCategory(string Name, string Description)
+        public async Task<ActionResult> CreateCategory([FromBody] Category category)
         {
-            Category category = new Category(Name, Description);
-            _context.Categories.Add(category);
-            _context.SaveChanges();
+            if (category == null)
+            {
+                return BadRequest("Invalid data provided. The 'category' object is null.");
+            }
 
-            return Ok(category);
+            if (string.IsNullOrWhiteSpace(category.Name))
+            {
+                return BadRequest("The 'name' field is required.");
+            }
+
+            // Optionally, you can perform additional validation here if needed.
+
+            try
+            {
+                _context.Categories.Add(category);
+                await _context.SaveChangesAsync();
+
+                // Include the description field in the response
+                var responseCategory = new
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    Description = category.Description
+                };
+
+                return CreatedAtAction("GetCategories", new { id = category.Id }, responseCategory);
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occur during database save.
+                return StatusCode(500, $"Internal Server Error: {ex.Message}");
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCategory(int id)
         {
             var categoryToDelete = _context.Categories.Find(id);
-            if(categoryToDelete == null)
+            if (categoryToDelete == null)
             {
                 return NotFound();
             }
@@ -54,26 +81,21 @@ namespace Commy.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Category category)
+        public async Task<ActionResult> UpdateCategory(int id, [FromBody] Category updatedCategory)
         {
-            if (id != category.Id)
-            {
-                return BadRequest();
-            }
-
-            var existingCategory = _context.Categories.Find(id); 
-            if (existingCategory == null)
+            var category = _context.Categories.Find(id);
+            if (category == null)
             {
                 return NotFound();
             }
 
-            existingCategory.Name = category.Name;
-            existingCategory.Description = category.Description;
+            // Update properties of the existing category with values from updatedCategory
+            category.Name = updatedCategory.Name;
+            category.Description = updatedCategory.Description;
 
-            _context.Categories.Update(existingCategory);
             _context.SaveChanges();
 
-            return NoContent();
+            return Ok(category);
         }
     }
 }
