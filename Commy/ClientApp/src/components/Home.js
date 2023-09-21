@@ -16,7 +16,7 @@ export function Home() {
         setCategoryListModalOpen(!categoryListModalOpen);
     };
 
-    const openCategoryDetailModal = async(category) => {
+    const openCategoryDetailModal = async (category) => {
         setSelectedCategory(category);
         fetchProductsForCategory(category);
     };
@@ -62,7 +62,7 @@ export function Home() {
         }
     };
 
-      
+
 
     // const handleItemClick = async (category) => {
     //     // When a category is clicked, set it as the selected category
@@ -87,11 +87,11 @@ export function Home() {
     };
 
     const deleteCategory = async (category) => {
-      if (!category) {
-        // Handle the case where category is null or undefined
-        console.error("Cannot delete null or undefined category.");
-        return;
-    }
+        if (!category) {
+            // Handle the case where category is null or undefined
+            console.error("Cannot delete null or undefined category.");
+            return;
+        }
         try {
             await axios.delete(`https://localhost:7287/categories/${category.id}`);
             toggleItemModal(null);
@@ -146,50 +146,16 @@ export function Home() {
                     selectedCategoryProducts={selectedCategoryProducts}
                 />
             )}
-            <PostCategory 
-            fetchData={fetchData}
+            <PostCategory
+                fetchData={fetchData}
             />
             <Products
-            
-            />
-        </div>
 
-        /* <Button color="primary" onClick={toggleModal}>
-          Open Menu
-        </Button>
-        <Modal isOpen={modalOpen} toggle={toggleModal}>
-          <ModalHeader toggle={toggleModal}>Item List</ModalHeader>
-          <ModalBody>
-            <ul className="list-group">
-              <div>
-                <Button outline color="primary" onClick={handleItemClick}>
-                  Groceries
-                </Button>{' '}
-                <Button outline color="primary" onClick={handleItemClick}>
-                  Clothes
-                </Button>{' '}
-                <Button outline color="primary" onClick={handleItemClick}>
-                  Electronics
-                </Button>{' '}
-                <Button outline color="primary" onClick={handleItemClick}>
-                  Home Appliances
-                </Button>{' '}
-                <Button outline color="primary" onClick={handleItemClick}>
-                  Jewelry
-                </Button>{' '}
-                <Button outline color="primary" onClick={handleItemClick}>
-                  Instrumental
-                </Button>{' '} */
-        /* Add more buttons */
-        /* </div> */
-        /* </ul> */
-        /* </ModalBody>
-        <ModalFooter>
-          <Button color="secondary" onClick={toggleModal}>
-            Close
-          </Button>
-        </ModalFooter>
-      </Modal> */
+            />
+            <Form>
+            </Form>
+        </div>
 
     );
 }
+export default Home;

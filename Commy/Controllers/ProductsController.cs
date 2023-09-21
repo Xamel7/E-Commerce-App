@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Commy;
 using Commy.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Commy.Controllers
 {
@@ -28,11 +29,10 @@ namespace Commy.Controllers
             return product;
         }
 
-        
-
-
 
         [HttpPost]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Editor")]
         public async Task<ActionResult> CreateProduct([FromBody] Product product)
         {
             if (product == null)
@@ -72,6 +72,7 @@ namespace Commy.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult> DeleteProduct(int id)
         {
             var ProductToDelete = _context.Products.Find(id);
@@ -85,6 +86,8 @@ namespace Commy.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "Editor")]
         public async Task<ActionResult> UpdateProduct(int id, [FromBody] Product updatedProduct)
         {
             var product = _context.Products.Find(id);
@@ -96,6 +99,8 @@ namespace Commy.Controllers
             // Update properties of the existing category with values from updatedCategory
             product.Name = updatedProduct.Name;
             product.Price = updatedProduct.Price;
+            product.CategoryId = updatedProduct.CategoryId;
+            product.Image = updatedProduct.Image;
 
             _context.SaveChanges();
 

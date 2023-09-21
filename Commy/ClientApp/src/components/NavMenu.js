@@ -2,7 +2,10 @@ import React, { Component } from 'react';
 import { Collapse, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLink } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import './NavMenu.css';
-
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import Registration from './Registration';
+import Login from './Login';
+import Home from './Home';
 export class NavMenu extends Component {
     static displayName = NavMenu.name;
 
@@ -39,10 +42,13 @@ export class NavMenu extends Component {
                             </NavItem>
                             <NavItem>
                                 <NavLink tag={Link} className="text-dark" to="/fetch-data">Fetch data</NavLink>
+                            </NavItem><NavItem>
+                                <NavLink tag={Link} className="text-dark" to="/Register">Register</NavLink>
                             </NavItem>
                         </ul>
-                    </Collapse>
+                    </Collapse>S
                 </Navbar>
+                <Link to="/Registration">Register</Link>
             </header>
         );
     }

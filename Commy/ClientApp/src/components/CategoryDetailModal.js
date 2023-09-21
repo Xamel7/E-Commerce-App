@@ -6,7 +6,7 @@ import Products from './Products';
 
 
 
-const CategoryDetailModal = ({ isOpen, toggle, category, fetchData, selectedCategoryProducts}) => {
+const CategoryDetailModal = ({ isOpen, toggle, category, fetchData, selectedCategoryProducts, imagePreview }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [itemName, setItemName] = useState('');
     const [description, setDescription] = useState('');
@@ -20,6 +20,10 @@ const CategoryDetailModal = ({ isOpen, toggle, category, fetchData, selectedCate
     const [productCategory, setproductCategory] = useState('');
     const [editProduct, setEditProduct] = useState(false);
     const [editProductModal, setEditProductModal] = useState(null);
+    const [editImage, setEditImage] = useState('');
+    const [image, setImage] = useState(null);
+    const [uploadingImg, setUploadingImg] = useState(false);
+    const [imagePreviews, setImagePreview] = useState(null);
 
     const toggleEditProduct =(category, selectedCategoryProduct) => {
     setEditProductModal(category);
@@ -73,14 +77,18 @@ const CategoryDetailModal = ({ isOpen, toggle, category, fetchData, selectedCate
             return;
           }
         
-          const newProduct = {
-            id: selectedProduct.id, // Make sure id is set correctly
-            name: productName, // Make sure productName is set correctly
-            price: parseFloat(productPrice), // Make sure productPrice is set correctly and converted to a number
-            categoryId: parseInt(productCategory), // Make sure productCategory is set correctly and converted to an integer
-          };
-        
-          try {
+       
+
+        try {
+            uploadImage();
+            const url = await uploadImage(image);
+            const newProduct = {
+                id: selectedProduct.id, // Make sure id is set correctly
+                name: productName, // Make sure productName is set correctly
+                price: parseFloat(productPrice), // Make sure productPrice is set correctly and converted to a number
+                categoryId: parseInt(productCategory), // Make sure productCategory is set correctly and converted to an integer
+                image: url,
+            };
             await axios.put(`https://localhost:7287/products/${selectedProduct.id}`, newProduct);
             // Handle successful update
             toggleEditProduct(); // Close the edit modal
@@ -90,19 +98,59 @@ const CategoryDetailModal = ({ isOpen, toggle, category, fetchData, selectedCate
             console.log('Server response (error):', error.response.data);
           }
     };
-    useEffect(() => {
-        fetchData();
-    }, []);
+
+    function validateImg(e) {
+        const file = e.target.files[0];
+        if (file.size >= 1048576) {
+            return alert("Max file size is 1mb");
+        } else {
+            setEditImage(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    }
+
+    async function uploadImage() {
+        const data = new FormData();
+        data.append("file", editImage);
+        data.append("upload_preset", `${process.env.REACT_APP_Cloud_Name}`);
+        try {
+            setUploadingImg(true);
+            let res = await fetch(
+                `${process.env.REACT_APP_CLOUD_API}`,
+                {
+                    method: "post",
+                    body: data,
+                }
+            );
+            const urlData = await res.json();
+            setUploadingImg(false);
+            return urlData.url;
+        } catch (error) {
+            setUploadingImg(false);
+            console.log(error);
+        }
+    }
+    const handleEdit = (e) => {
+        setEditImage(e.target.value);
+        validateImg(e);
+        
+    }
+
+    //useEffect(() => {
+    //    fetchData();
+    //}, []);
     return (
         <div>
             <Modal isOpen={isOpen} toggle={toggle}>
-                <ModalHeader toggle={toggle}>{category.name}</ModalHeader>
+                <ModalHeader toggle={toggle}>{category?.name}</ModalHeader>
                 <ModalBody>
-                    <p>Description: {category.description}</p>
+                    <p>Description: {category?.description}</p>
                     <ul>{selectedCategoryProducts?.filter((product) => product.categoryId === category.id).map((products) => (
                         <li key={products.id}>
                             <p>Name:{products.name}</p>
                             <p>Price:{products.price}</p>
+                            <img src={products.image} alt=''/>
+                            
                             <Button color="danger" onClick={() => deleteProduct(products)}>Delete</Button>
                             <Button color="primary" onClick={() => toggleEditProduct(category, products)}>Edit</Button>
                         </li>))}</ul>
@@ -184,10 +232,26 @@ const CategoryDetailModal = ({ isOpen, toggle, category, fetchData, selectedCate
 
             <Modal isOpen={editProduct} toggle={toggleEditProduct} fullscreen>
                 <ModalHeader toggle={toggleEditProduct}>
-                    Edit Category
+                    Edit Product
                 </ModalHeader>
                 <ModalBody>
                     <Form>
+                        <FormGroup>
+                            <img src={imagePreviews}
+                                className="product"
+                                alt='' />
+                            <Label
+                                for="exampleName">
+                                Image
+                            </Label>
+                            <Input
+                                id="Product-Image"
+                                name="Image"
+                                placeholder="Product-Image"
+                                type="file"
+                                accept="image/png, image/jpeg"
+                                onChange={validateImg} />
+                        </FormGroup>
                         <FormGroup>
                             <Label for="Product-Name">Product Name</Label>
                             <Input
@@ -241,33 +305,3 @@ const CategoryDetailModal = ({ isOpen, toggle, category, fetchData, selectedCate
 };
 
 export default CategoryDetailModal;
-
-//     var categoryUpdate = { ...selectedCategory }
-
-//     const [isOpen, setIsOpen] = useState(false)
-
-//     const newNamedItem = (props) => {
-//       const newitemName = {
-//         newName : [...props.itemName]
-//     };
-
-//     const [nameState, setNameState] = useState(newNamedItem);
-
-//     useEffect(() => {
-//         setNameState({...nameState, newitemName: [...props.itemName]})
-//     }, [props.itemName])
-//     };
-
-
-
-//     function deleteCategory() {
-//         axios.delete("https://localhost:7089/categories", { "params": { id: selectedCategory.id } })
-//             .then(response => {
-//                 let updatedCategories = [...categories]
-//                 let index = updatedCategories.find((element) => {
-//                     return element.id == selectedCategory.id
-//                 })
-//                 updatedCategories.splice(index, 1)
-//                 setCategories(updatedCategories)
-//                 setIsOpen(false)
-//             })

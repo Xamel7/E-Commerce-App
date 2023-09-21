@@ -20,9 +20,11 @@ namespace Commy.Controllers
         private UserManager<ApplicationUser> userManager;
         private SignInManager<ApplicationUser> signInManager;
         private JwtTokenService tokenService;
-        public UsersController(UserManager<ApplicationUser> manager)
+        public UsersController(UserManager<ApplicationUser> manager, JwtTokenService _tokenService, SignInManager<ApplicationUser> _signInManager)
         {
             userManager = manager;
+            tokenService = _tokenService;
+            signInManager = _signInManager;
         }
         // ROUTES
         [HttpPost("Register")]
@@ -81,13 +83,13 @@ namespace Commy.Controllers
         public async Task<ActionResult<ApplicationUser>> Login(ApplicationUser data)
         {
 
-            var user = await userManager.FindByNameAsync(data.Username);
+            var user = await userManager.FindByNameAsync(data.UserName);
             if (await userManager.CheckPasswordAsync(user, data.Password))
             {
                 return new ApplicationUser()
                 {
                     Id = user.Id,
-                    Username = user.UserName,
+                    UserName = user.UserName,
                 };
             }
             if (user == null)
@@ -96,6 +98,7 @@ namespace Commy.Controllers
             }
             return user;
         }
+
         [Authorize(Policy = "create")]
         [HttpGet("me")]
         public async Task<ApplicationUser> GetUser(ClaimsPrincipal principal)
@@ -106,7 +109,8 @@ namespace Commy.Controllers
                 Id = user.Id,
                 UserName = user.UserName
             };
-        }​
-    };
+        }
 
+    }
 }
+

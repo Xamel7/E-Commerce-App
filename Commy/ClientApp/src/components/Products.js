@@ -14,12 +14,49 @@ export function Products() {
     const [productModal, setProductModal] = useState(false);
     const [price, setPrice] = useState('');
 
+    const [image, setImage] = useState(null);
+    const [uploadingImg, setUploadingImg] = useState(false);
+    const [imagePreview, setImagePreview] = useState(null);
+
     const toggle = () => setProductModal(!productModal);
 
+    function validateImg(e) {
+        const file = e.target.files[0];
+        if (file.size >= 1048576) {
+            return alert("Max file size is 1mb");
+        } else {
+            setImage(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    }
+
+    async function uploadImage() {
+        const data = new FormData();
+        data.append("file", image);
+        data.append("upload_preset", `${process.env.REACT_APP_Cloud_Name}`);
+        try {
+            setUploadingImg(true);
+            let res = await fetch(
+                `${process.env.REACT_APP_CLOUD_API}`,
+                {
+                    method: "post",
+                    body: data,
+                }
+            );
+            const urlData = await res.json();
+            setUploadingImg(false);
+            return urlData.url;
+        } catch (error) {
+            setUploadingImg(false);
+            console.log(error);
+        }
+    }
 
     const createProduct = async () => {
         try {
-            const requestData = { Name: name, Price: price, CategoryId: categoryId };
+            uploadImage();
+            const url = await uploadImage(image);
+            const requestData = { Name: name, Price: price, CategoryId: categoryId, image: url };
             await axios.post('https://localhost:7287/products/', requestData);
             toggle();
             fetchData();
@@ -54,6 +91,20 @@ export function Products() {
                 <ModalBody>
                     <Form>
                         <FormGroup>
+                            <img src={imagePreview}
+                                className="product"
+                                alt='' />
+                            <Label
+                                for="exampleName">
+                                Image
+                            </Label>
+                            <Input
+                                id="Product-Image"
+                                name="Image"
+                                placeholder="Product-Image"
+                                 type="file" accept="image/png, image/jpeg" onChange={validateImg} />
+                        </FormGroup>
+                        <FormGroup>
                             <Label
                                 for="exampleName">
                                 Product Name
@@ -75,7 +126,7 @@ export function Products() {
                                 name="Price"
                                 placeholder="Product-Price"
                                 type="price"
-                                value={price} onChange={(e) => setPrice(e.target.value)} required/>
+                                value={price} onChange={(e) => setPrice(e.target.value)} required />
                         </FormGroup>
 
                         {' '}
@@ -106,6 +157,7 @@ export function Products() {
                     </Button>
                 </ModalFooter>
             </Modal>
+
 
             {/* <CategoryDetailModal
                 fetchData={fetchData}

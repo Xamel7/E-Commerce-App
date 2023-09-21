@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Commy;
 using Commy.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Commy.Controllers
 {
@@ -68,6 +69,7 @@ namespace Commy.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult> DeleteCategory(int id)
         {
             var categoryToDelete = _context.Categories.Find(id);

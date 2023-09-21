@@ -4,6 +4,7 @@ using Commy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Commy.Migrations
 {
     [DbContext(typeof(CommyDBContext))]
-    partial class CommyDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230914212459_user")]
+    partial class user
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -97,22 +100,6 @@ namespace Commy.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "admin",
-                            ConcurrencyStamp = "00000000-0000-0000-0000-000000000000",
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
-                        },
-                        new
-                        {
-                            Id = "editor",
-                            ConcurrencyStamp = "00000000-0000-0000-0000-000000000000",
-                            Name = "Editor",
-                            NormalizedName = "EDITOR"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -138,50 +125,6 @@ namespace Commy.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1006,
-                            ClaimType = "permissions",
-                            ClaimValue = "create",
-                            RoleId = "admin"
-                        },
-                        new
-                        {
-                            Id = 1007,
-                            ClaimType = "permissions",
-                            ClaimValue = "update",
-                            RoleId = "admin"
-                        },
-                        new
-                        {
-                            Id = 1008,
-                            ClaimType = "permissions",
-                            ClaimValue = "delete",
-                            RoleId = "admin"
-                        },
-                        new
-                        {
-                            Id = 1009,
-                            ClaimType = "permissions",
-                            ClaimValue = "read",
-                            RoleId = "admin"
-                        },
-                        new
-                        {
-                            Id = 1010,
-                            ClaimType = "permissions",
-                            ClaimValue = "create",
-                            RoleId = "editor"
-                        },
-                        new
-                        {
-                            Id = 1011,
-                            ClaimType = "permissions",
-                            ClaimValue = "update",
-                            RoleId = "editor"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
@@ -194,10 +137,6 @@ namespace Commy.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
@@ -251,10 +190,6 @@ namespace Commy.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -340,49 +275,6 @@ namespace Commy.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("Commy.Models.ApplicationUser", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasDiscriminator().HasValue("ApplicationUser");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "85ab61ea-81dc-4ab6-ab65-1b57be2000f6",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "aad61c8a-26cd-41fe-a492-4e8f58914de1",
-                            EmailConfirmed = false,
-                            LockoutEnabled = false,
-                            NormalizedEmail = "ADMIN@EXAMPLE.COM",
-                            NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJ1UPcujebAgGDn3c9bHtYg8tu1MeAuyEMwMh3dHM/oHBSTMXc2Afz9eOYLrijvq7Q==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "f0fbc4f7-0975-4fcb-9c68-fd78a788d75d",
-                            TwoFactorEnabled = false,
-                            Password = "Password123!"
-                        },
-                        new
-                        {
-                            Id = "249bdd6e-e92d-4bbc-b083-54987a10facd",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "e1770357-6466-4a4e-bf2d-c7bda022a9df",
-                            EmailConfirmed = false,
-                            LockoutEnabled = false,
-                            NormalizedEmail = "editor@example.com",
-                            NormalizedUserName = "EDITOR",
-                            PasswordHash = "AQAAAAIAAYagAAAAEIq1RZGdgBfxEnh1ffy6dsCNFlEU7gRNtOPAf35NfzdpVle97wTNeSfsexXjaeuNKQ==",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "beb87065-fad9-4b4f-9cce-26ee711601dd",
-                            TwoFactorEnabled = false,
-                            Password = "Password123!"
-                        });
                 });
 
             modelBuilder.Entity("Commy.Models.Product", b =>
